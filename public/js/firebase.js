@@ -1,25 +1,66 @@
-const { initializeApp } = require('firebase/app');
-const { getAuth, GoogleAuthProvider, FacebookAuthProvider } = require('firebase/auth');
-const { getFirestore } = require('firebase/firestore');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyDz0iJka4FDfAZBCOdfe3nNZsJT_BOVN5Y",
+  authDomain: "transformers-app.firebaseapp.com",
+  projectId: "transformers-app",
+  storageBucket: "transformers-app.appspot.com",
+  messagingSenderId: "719832838826",
+  appId: "1:719832838826:web:7aee577492bbb29fcf56d3",
+  measurementId: "G-SP4BHYNQ7S",
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
-const facebookProvider = new FacebookAuthProvider();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-module.exports = { app, auth, db, googleProvider, facebookProvider };
+const googleLogin = async () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try {
+    const result = await auth.signInWithPopup(provider);
+    const token = await result.user.getIdToken();
+    // Send the token to the server
+    const response = await fetch('/auth/login/google', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token })
+    });
+    const data = await response.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      console.error('Google login failed:', data.message);
+    }
+  } catch (error) {
+    console.error('Google login error:', error);
+  }
+};
+
+const facebookLogin = async () => {
+  const provider = new firebase.auth.FacebookAuthProvider();
+  try {
+    const result = await auth.signInWithPopup(provider);
+    const token = await result.user.getIdToken();
+    // Send the token to the server
+    const response = await fetch('/auth/login/facebook', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token })
+    });
+    const data = await response.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      console.error('Facebook login failed:', data.message);
+    }
+  } catch (error) {
+    console.error('Facebook login error:', error);
+  }
+};
+
+// Make functions accessible globally
+window.googleLogin = googleLogin;
+window.facebookLogin = facebookLogin;

@@ -1,12 +1,31 @@
 const express = require('express');
 const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth');
 const { auth, db } = require('../firebaseConfig');
-const { addDoc, collection } = require('firebase/firestore');
+const { setDoc, doc } = require('firebase/firestore');
+const axios = require('axios');
 const router = express.Router();
-require('dotenv').config();
+const admin = require('firebase-admin');
+
+// Verify reCAPTCHA function
+async function verifyRecaptcha(token) {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  try {
+    const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+      params: {
+        secret: secretKey,
+        response: token
+      }
+    });
+    console.log('reCAPTCHA response:', response.data); // Log the response for debugging
+    return response.data.success;
+  } catch (error) {
+    console.error('Error during reCAPTCHA verification:', error);
+    return false;
+  }
+}
 
 router.get('/login', (req, res) => {
-  res.render('login', { email: req.query.email || '' });
+  res.render('login');
 });
 
 router.get('/signup', (req, res) => {
@@ -14,46 +33,54 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-  const { email, password } = req.body;
-  console.log('Attempting to create user with email:', email);
+  const { email, password, 'g-recaptcha-response': recaptchaToken } = req.body;
+  console.log('Received reCAPTCHA token:', recaptchaToken); // Log the token for debugging
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log('User created:', userCredential.user);
+    if (await verifyRecaptcha(recaptchaToken)) {
+      console.log('Attempting to create user with email:', email);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('User created:', userCredential.user);
 
-    // Add user to Firestore
-    const userDoc = {
-      uid: userCredential.user.uid,
-      email: userCredential.user.email,
-      createdAt: new Date()
-    };
-    await addDoc(collection(db, 'users'), userDoc);
-    console.log('User document added to Firestore:', userDoc);
+      // Add user to Firestore with UID as the document ID
+      const userDoc = {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        createdAt: new Date()
+      };
+      await setDoc(doc(db, 'users', userCredential.user.uid), userDoc);
 
-    // Store session data and redirect to dashboard
-    req.session.user = userCredential.user;
-    res.redirect('/dashboard');
+      req.session.user = userCredential.user;
+
+      // Send success message to the client and redirect to dashboard
+      res.status(200).send(`
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Your information has been saved. Redirecting to dashboard...',
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = '/dashboard';
+          });
+        </script>
+      `);
+    } else {
+      throw new Error('Failed reCAPTCHA verification');
+    }
   } catch (error) {
     console.error('Error during sign up:', error);
-
-    let errorMessage = 'An error occurred during sign up. Please try again.';
-    if (error.code === 'auth/weak-password') {
-      errorMessage = 'Password should be at least 6 characters.';
-    } else if (error.code === 'auth/email-already-in-use') {
-      errorMessage = 'The email address is already in use.';
-    }
-
     res.status(400).send(`
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: '${errorMessage}',
-            footer: '<a href="/auth/signup">Try again</a>'
-          }).then(() => {
-            window.location.href = "/auth/signup";
-          });
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: '${error.message}',
+          footer: '<a href="/auth/signup">Try again</a>'
+        }).then(() => {
+          window.location.href = "/auth/signup";
         });
       </script>
     `);
@@ -61,88 +88,68 @@ router.post('/signup', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  console.log('Attempting to log in user with email:', email);
+  const { email, password, 'g-recaptcha-response': recaptchaToken } = req.body;
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log('User logged in:', userCredential.user);
-    req.session.user = userCredential.user;
-    res.redirect('/dashboard');
+    if (await verifyRecaptcha(recaptchaToken)) {
+      console.log('Attempting to log in user with email:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('User logged in:', userCredential.user);
+      req.session.user = userCredential.user;
+      res.redirect('/dashboard');
+    } else {
+      throw new Error('Failed reCAPTCHA verification');
+    }
   } catch (error) {
     console.error('Error during login:', error);
-    let errorMessage = 'An error occurred during login. Please try again.';
-    if (error.code === 'auth/user-not-found') {
-      errorMessage = 'No user found with this email.';
-    } else if (error.code === 'auth/wrong-password') {
-      errorMessage = 'Incorrect password.';
-    } else if (error.code === 'auth/invalid-credential') {
-      errorMessage = 'Invalid credentials provided.';
+
+    let errorMessage = 'An error occurred during login.';
+    if (error.code === 'auth/invalid-credential') {
+      errorMessage = 'Invalid email or password. Please try again.';
     }
 
     res.status(400).send(`
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: '${errorMessage}',
-            footer: '<a href="/auth/login">Try again</a>'
-          }).then(() => {
-            window.location.href = "/auth/login";
-          });
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: '${errorMessage}',
+          footer: '<a href="/auth/login">Try again</a>'
+        }).then(() => {
+          window.location.href = "/auth/login";
         });
       </script>
     `);
   }
 });
 
-// Handle Google Login
-router.post('/google', async (req, res) => {
-  const { user } = req.body;
+// Google Login
+router.post('/login/google', async (req, res) => {
+  const { token } = req.body;
   try {
-    const userDoc = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      createdAt: new Date()
-    };
-    await addDoc(collection(db, 'users'), userDoc);
-    console.log('User document added to Firestore:', userDoc);
-
-    req.session.user = user;
-    res.status(200).send('User logged in with Google');
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    req.session.user = decodedToken;
+    res.json({ success: true });
   } catch (error) {
     console.error('Error during Google login:', error);
-    res.status(400).send('Failed to log in with Google');
+    res.json({ success: false, message: error.message });
   }
 });
 
-// Handle Facebook Login
-router.post('/facebook', async (req, res) => {
-  const { user } = req.body;
+// Facebook Login
+router.post('/login/facebook', async (req, res) => {
+  const { token } = req.body;
   try {
-    const userDoc = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      createdAt: new Date()
-    };
-    await addDoc(collection(db, 'users'), userDoc);
-    console.log('User document added to Firestore:', userDoc);
-
-    req.session.user = user;
-    res.status(200).send('User logged in with Facebook');
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    req.session.user = decodedToken;
+    res.json({ success: true });
   } catch (error) {
     console.error('Error during Facebook login:', error);
-    res.status(400).send('Failed to log in with Facebook');
+    res.json({ success: false, message: error.message });
   }
 });
 
-// Define the logout route
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).send(err.message);

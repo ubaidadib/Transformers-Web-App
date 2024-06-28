@@ -6,7 +6,7 @@ const session = require('express-session');
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const dashboardRouter = require('./routes/dashboard');
-const { app: firebaseApp, auth, db } = require('./firebaseConfig'); // Correct path
+const { app: firebaseApp, auth, db } = require('./firebaseConfig');
 
 dotenv.config();
 
@@ -20,6 +20,9 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve JS files from the "js" directory
+app.use('/js', express.static(path.join(__dirname, 'js')));
+
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -30,12 +33,6 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
-
-// Middleware to inject reCAPTCHA site key
-app.use((req, res, next) => {
-  res.locals.recaptchaSiteKey = process.env.RECAPTCHA_SITE_KEY;
-  next();
-});
 
 // Middleware to check if user is authenticated
 function checkAuth(req, res, next) {

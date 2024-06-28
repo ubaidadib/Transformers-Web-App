@@ -1,7 +1,9 @@
 const { initializeApp } = require('firebase/app');
 const { getAuth, GoogleAuthProvider, FacebookAuthProvider } = require('firebase/auth');
 const { getFirestore } = require('firebase/firestore');
+const admin = require('firebase-admin');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 
@@ -21,5 +23,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
+
+// Initialize Firebase Admin SDK with service account key
+admin.initializeApp({
+  credential: admin.credential.cert(require(path.join(__dirname, 'serviceAccountKey.json'))),
+  databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
+});
 
 module.exports = { app, auth, db, googleProvider, facebookProvider };
