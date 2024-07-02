@@ -28,7 +28,8 @@ const googleLogin = async () => {
     });
     const data = await response.json();
     if (data.success) {
-      window.location.href = '/dashboard';
+      // If successful, redirect to main screen
+      window.location.href = '/';
     } else {
       console.error('Google login failed:', data.message);
     }
@@ -52,7 +53,8 @@ const facebookLogin = async () => {
     });
     const data = await response.json();
     if (data.success) {
-      window.location.href = '/dashboard';
+       // If successful, redirect to main screen
+       window.location.href = '/';
     } else {
       console.error('Facebook login failed:', data.message);
     }

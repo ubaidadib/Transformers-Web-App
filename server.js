@@ -3,6 +3,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const multer = require('multer');
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const dashboardRouter = require('./routes/dashboard');
@@ -28,9 +29,6 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve JS files from the "js" directory
-app.use('/js', express.static(path.join(__dirname, 'js')));
-
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -52,6 +50,23 @@ function checkAuth(req, res, next) {
   }
 }
 
+// Middleware to add loggedInUser to all routes
+app.use((req, res, next) => {
+  res.locals.loggedInUser = req.session.user;
+  next();
+});
+
+// Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images/uploads');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage });
+
 // Routes
 app.use('/auth', authRouter);
 app.use('/dashboard', checkAuth, dashboardRouter);
@@ -70,6 +85,30 @@ app.get('/', (req, res) => {
     res.render('main'); // Render the main screen
   } else {
     res.redirect('/auth/login');
+  }
+});
+
+// Profile setup route
+app.get('/profile/setup', checkAuth, (req, res) => {
+  res.render('profileSetup');
+});
+
+app.post('/profile/setup', checkAuth, upload.single('profilePicture'), async (req, res) => {
+  const { displayName, recyclingGoals } = req.body;
+  try {
+    const userRef = db.collection('users').doc(req.session.user.uid);
+    const profilePicture = req.file ? `/images/uploads/${req.file.filename}` : '';
+    const updateData = {
+      displayName,
+      recyclingGoals,
+      profilePicture
+    };
+
+    await userRef.update(updateData);
+    res.redirect('/');
+  } catch (error) {
+    console.error('Error during profile setup:', error);
+    res.status(500).send('Error during profile setup');
   }
 });
 

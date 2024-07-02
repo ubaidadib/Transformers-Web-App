@@ -146,7 +146,7 @@ router.post('/login/google', async (req, res) => {
   }
 });
 
-router.post('/login/facebook', async (req, res) => {
+router.post('/login/facebook', async (req, res) => {  
   const { token } = req.body;
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);

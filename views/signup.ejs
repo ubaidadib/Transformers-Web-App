@@ -71,8 +71,8 @@
           throw new Error(errorData);
         }
 
-        // If successful, redirect to main screen
-        window.location.href = '/';
+        // If successful, redirect to profile setup screen
+        window.location.href = '/profile/setup';
       } catch (error) {
         console.error('Error during sign up:', error);
         Swal.fire({
