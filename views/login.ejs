@@ -14,7 +14,7 @@
 <body>
   <div class="container">
     <h2 class="mt-5">Login</h2>
-    <form action="/auth/login" method="post" id="login-form">
+    <form id="login-form">
       <div class="form-group">
         <label for="email">Email address:</label>
         <input type="email" class="form-control" id="email" name="email" required>
@@ -40,6 +40,44 @@
       grecaptcha.execute('6LflzQIqAAAAAMXWRw4-ay2eSMR5JmLdC9VQ_25O', {action: 'login'}).then(function(token) {
         document.getElementById('g-recaptcha-response').value = token;
       });
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('pwd').value;
+      const recaptchaResponse = document.getElementById('g-recaptcha-response').value;
+
+      try {
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            'g-recaptcha-response': recaptchaResponse
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(errorData);
+        }
+
+        // If successful, redirect to main screen
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Error during login:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Invalid email or password. Please try again.',
+          footer: '<a href="/auth/login">Try again</a>'
+        });
+      }
     });
   </script>
 </body>

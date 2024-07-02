@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main Screen</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+      background-color: #f8f9fa;
+    }
+    #sidebar {
+      min-width: 250px;
+      max-width: 250px;
+      background: #343a40;
+      color: #fff;
+      transition: all 0.3s;
+      flex-shrink: 0;
+      padding-top: 20px;
+    }
+    #sidebar .nav-link {
+      color: #fff;
+      padding: 10px 20px;
+      transition: background 0.3s;
+    }
+    #sidebar .nav-link:hover {
+      background: #495057;
+    }
+    #content {
+      flex: 1;
+      padding: 20px;
+    }
+    .card {
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .card-body {
+      padding: 20px;
+    }
+    .footer {
+      background-color: #343a40;
+      color: #fff;
+      padding: 10px 0;
+    }
+    .footer .social-icons a {
+      color: #fff;
+      margin: 0 10px;
+      transition: color 0.3s;
+    }
+    .footer .social-icons a:hover {
+      color: #007bff;
+    }
+    .icon {
+      width: 40px;
+      height: 40px;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        min-width: 100%;
+        max-width: 100%;
+      }
+      .card {
+        margin-bottom: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="bg-dark">
+      <div class="sidebar-header p-3 text-center">
+        <h4>AppLogo</h4>
+      </div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="/barcode-scanner">
+            <img src="/images/barcode-icon.png" alt="Barcode" class="icon"> Barcode Scanning
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/learning-modules">
+            <img src="/images/modules-icon.png" alt="Modules" class="icon"> Learning Modules
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/challenges">
+            <img src="/images/challenges-icon.png" alt="Challenges" class="icon"> Challenges
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/rewards">
+            <img src="/images/rewards-icon.png" alt="Rewards" class="icon"> Rewards
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#profileSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+            <img src="/images/profile-icon.png" alt="Profile" class="icon"> Profile
+          </a>
+          <ul class="collapse list-unstyled" id="profileSubmenu">
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item">
+              <form action="/auth/logout" method="post" class="form-inline">
+                <button type="submit" class="btn btn-danger">Logout</button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content" class="container">
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <h2 class="mt-4">Welcome to Transformers!</h2>
+          <p>Your one-stop solution for managing all your recycling needs.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Recent Activity</h5>
+              <p class="card-text">Check your latest activities.</p>
+              <a href="/dashboard#activity-section" class="btn btn-primary">View Activity Log</a>
+            </div>
+          </div>
+        </div>
+        <!-- Notifications -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Notifications</h5>
+              <p class="card-text">Manage your notifications.</p>
+              <a href="/settings" class="btn btn-primary">Manage Notifications</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Barcode Packaging Detection -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Scan Barcode</h5>
+              <p class="card-text">Scan packaging barcodes to get recycling instructions.</p>
+              <a href="/barcode-scanner" class="btn btn-primary">Scan Barcode</a>
+            </div>
+          </div>
+        </div>
+        <!-- Trash Sorting Game -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Trash Sorting Game</h5>
+              <p class="card-text">Play the game to sort waste items into correct bins.</p>
+              <a href="/trash-sorting-game" class="btn btn-primary">Play Game</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Quiz Game -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Recycling Quiz</h5>
+              <p class="card-text">Test your recycling knowledge with quizzes.</p>
+              <a href="/quiz-game" class="btn btn-primary">Take Quiz</a>
+            </div>
+          </div>
+        </div>
+        <!-- Challenges and Rewards -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Challenges and Rewards</h5>
+              <p class="card-text">Participate in challenges and earn rewards.</p>
+              <a href="/challenges" class="btn btn-primary">View Challenges</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Educational Content -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Educational Content</h5>
+              <p class="card-text">Learn about recycling and sustainability.</p>
+              <a href="/educational-content" class="btn btn-primary">Learn More</a>
+            </div>
+          </div>
+        </div>
+        <!-- Community Engagement -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Community Engagement</h5>
+              <p class="card-text">Engage with the community and compete with others.</p>
+              <a href="/community" class="btn btn-primary">Engage Now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Waste Management Tools -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Waste Management Tools</h5>
+              <p class="card-text">Keep track of recycling collection dates and local disposal locations.</p>
+              <a href="/waste-management" class="btn btn-primary">Manage Waste</a>
+            </div>
+          </div>
+        </div>
+        <!-- Personal Statistics -->
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Personal Statistics</h5>
+              <p class="card-text">View your recycling contributions and statistics.</p>
+              <a href="/personal-statistics" class="btn btn-primary">View Stats</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-auto">
+    <div class="container text-center">
+      <span>&copy; 2024 Your Company. All rights reserved.</span>
+      <div class="social-icons mt-2">
+        <a href="#" class="text-white mx-2">Facebook</a>
+        <a href="#" class="text-white mx-2">Twitter</a>
+        <a href="#" class="text-white mx-2">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

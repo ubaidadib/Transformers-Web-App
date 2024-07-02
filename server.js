@@ -6,7 +6,15 @@ const session = require('express-session');
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
 const dashboardRouter = require('./routes/dashboard');
-const { app: firebaseApp, auth, db } = require('./firebaseConfig');
+const profileRouter = require('./routes/profile');
+const settingsRouter = require('./routes/settings');
+const helpRouter = require('./routes/help');
+const mainRouter = require('./routes/main'); // Main screen route
+const barcodeScannerRouter = require('./routes/barcodeScanner'); // Barcode Scanner route
+const learningModulesRouter = require('./routes/learningModules'); // Learning Modules route
+const challengesRouter = require('./routes/challenges'); // Challenges route
+const rewardsRouter = require('./routes/rewards'); // Rewards route
+const { app: firebaseApp, auth, db, googleProvider, facebookProvider } = require('./firebaseConfig');
 
 dotenv.config();
 
@@ -31,7 +39,8 @@ app.use(bodyParser.json());
 app.use(session({
   secret: 'transformers-web-app', // Replace with a secure random string
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
 }));
 
 // Middleware to check if user is authenticated
@@ -43,18 +52,28 @@ function checkAuth(req, res, next) {
   }
 }
 
+// Routes
 app.use('/auth', authRouter);
 app.use('/dashboard', checkAuth, dashboardRouter);
-app.use('/', checkAuth, indexRouter);
+app.use('/profile', checkAuth, profileRouter);
+app.use('/settings', checkAuth, settingsRouter);
+app.use('/help', checkAuth, helpRouter);
+app.use('/', checkAuth, mainRouter); // Main screen route
+app.use('/barcode-scanner', checkAuth, barcodeScannerRouter); // Barcode Scanner route
+app.use('/learning-modules', checkAuth, learningModulesRouter); // Learning Modules route
+app.use('/challenges', checkAuth, challengesRouter); // Challenges route
+app.use('/rewards', checkAuth, rewardsRouter); // Rewards route
 
+// Ensure main screen is rendered as the default route for authenticated users
 app.get('/', (req, res) => {
   if (req.session.user) {
-    res.redirect('/dashboard'); // Redirect to the dashboard or home page
+    res.render('main'); // Render the main screen
   } else {
     res.redirect('/auth/login');
   }
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

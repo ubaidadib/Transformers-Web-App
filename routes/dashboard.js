@@ -1,5 +1,5 @@
 const express = require('express');
-const { getDoc, doc } = require('firebase/firestore');
+const { getDoc, doc, collection, query, where, getDocs } = require('firebase/firestore');
 const { db } = require('../firebaseConfig');
 const router = express.Router();
 
@@ -16,10 +16,15 @@ router.get('/', async (req, res) => {
 
     if (userDocSnap.exists()) {
       const userData = userDocSnap.data();
-      res.render('dashboard', { user: userData });
+
+      // Fetch recent activity (assuming you have an 'activities' collection)
+      const activitiesQuery = query(collection(db, 'activities'), where('uid', '==', user.uid));
+      const activitiesSnapshot = await getDocs(activitiesQuery);
+      const recentActivity = activitiesSnapshot.docs.map(doc => doc.data().activity);
+
+      res.render('dashboard', { user: userData, recentActivity, section: 'profile' });
     } else {
-      console.log('User document not found for UID:', user.uid); // Log the missing UID for debugging
-      res.render('dashboard', { user: null });
+      res.render('dashboard', { user: null, recentActivity: [], section: 'profile' });
     }
   } catch (error) {
     console.error('Error fetching user data:', error);

@@ -3,26 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <title>User Dashboard</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    #sidebar {
+      min-width: 250px;
+      max-width: 250px;
+      background: #343a40;
+      color: #fff;
+      transition: all 0.3s;
+    }
+    #sidebar .nav-link {
+      color: #fff;
+    }
+    #content {
+      flex: 1;
+      padding: 20px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        min-width: 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="mt-5">Dashboard</h2>
-    <% if (user) { %>
-      <p>Welcome, <%= user.email %>!</p>
-      <p>UID: <%= user.uid %></p>
-      <p>Account created at: <%= new Date(user.createdAt.toDate()).toDateString() %></p>
-    <% } else { %>
-      <p>User data not found.</p>
-    <% } %>
-    <form action="/auth/logout" method="post">
-      <button type="submit" class="btn btn-danger">Logout</button>
-    </form>
+  <div class="d-flex" id="wrapper">
+    <div id="sidebar" class="bg-dark p-3">
+      <div class="sidebar-header">
+        <h4>Dashboard</h4>
+      </div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('profile-section')">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('settings-section')">Settings</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('activity-section')">Activity Log</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('help-section')">Help/Support</a>
+        </li>
+        <li class="nav-item mt-3">
+          <form action="/auth/logout" method="post">
+            <button type="submit" class="btn btn-danger w-100">Logout</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+
+    <div id="content" class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h2 class="mt-4">Welcome, <%= user.email %>!</h2>
+          <p>Your UID: <%= user.uid %></p>
+          <p>Account created at: <%= new Date(user.createdAt.toDate()).toDateString() %></p>
+        </div>
+      </div>
+
+      <!-- Profile Section -->
+      <div id="profile-section" class="content-section" style="display:<%= section === 'profile' ? 'block' : 'none' %>;">
+        <h3>Profile</h3>
+        <form action="/profile/update" method="post">
+          <div class="form-group">
+            <label for="displayName">Display Name:</label>
+            <input type="text" class="form-control" id="displayName" name="displayName" value="<%= user.displayName || '' %>" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email address:</label>
+            <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+      </div>
+
+      <!-- Settings Section -->
+      <div id="settings-section" class="content-section" style="display:<%= section === 'settings' ? 'block' : 'none' %>;">
+        <h3>Settings</h3>
+        <form action="/settings/update" method="post">
+          <div class="form-group">
+            <label for="notificationPreferences">Notification Preferences:</label>
+            <select class="form-control" id="notificationPreferences" name="notificationPreferences">
+              <option value="email" <%= user.notificationPreferences === 'email' ? 'selected' : '' %>>Email</option>
+              <option value="sms" <%= user.notificationPreferences === 'sms' ? 'selected' : '' %>>SMS</option>
+              <option value="none" <%= user.notificationPreferences === 'none' ? 'selected' : '' %>>None</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Update Settings</button>
+        </form>
+      </div>
+
+      <!-- Activity Log Section -->
+      <div id="activity-section" class="content-section" style="display:<%= section === 'activity' ? 'block' : 'none' %>;">
+        <h3>Activity Log</h3>
+        <ul class="list-group">
+          <% if (recentActivity && recentActivity.length > 0) { %>
+            <% recentActivity.forEach(activity => { %>
+              <li class="list-group-item"><%= activity %></li>
+            <% }); %>
+          <% } else { %>
+            <li class="list-group-item">No recent activity found.</li>
+          <% } %>
+        </ul>
+      </div>
+
+      <!-- Help/Support Section -->
+      <div id="help-section" class="content-section" style="display:<%= section === 'help' ? 'block' : 'none' %>;">
+        <h3>Help & Support</h3>
+        <p>If you need assistance, please refer to the following resources:</p>
+        <ul>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
   </div>
+
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function showSection(sectionId) {
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+      });
+      document.getElementById(sectionId).style.display = 'block';
+      history.pushState(null, '', `#${sectionId}`);
+    }
+
+    // Show the correct section based on the hash in the URL
+    const section = window.location.hash.substring(1) || 'profile-section';
+    showSection(section);
+  </script>
 </body>
 </html>
