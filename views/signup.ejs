@@ -28,9 +28,10 @@
       <button type="submit" class="btn btn-primary">Sign Up</button>
       <p class="mt-3">Already have an account? <a href="/auth/login">Login here</a>.</p>
     </form>
-    <button onclick="googleLogin()" class="btn btn-danger mt-2">Sign Up with Google</button>
-    <button onclick="facebookLogin()" class="btn btn-primary mt-2">Sign Up with Facebook</button>
+    <button id="google-signup-btn" class="btn btn-danger mt-2">Sign Up with Google</button>
+    <button id="facebook-signup-btn" class="btn btn-primary mt-2">Sign Up with Facebook</button>
   </div>
+
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -80,6 +81,62 @@
           title: 'Oops...',
           text: 'Failed to sign up. Please try again.',
           footer: '<a href="/auth/signup">Try again</a>'
+        });
+      }
+    });
+
+    document.getElementById('google-signup-btn').addEventListener('click', async function() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        const token = await result.user.getIdToken();
+        const response = await fetch('/auth/signup/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token })
+        });
+        if (response.ok) {
+          window.location.href = '/profile/setup';
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message);
+        }
+      } catch (error) {
+        console.error('Error during Google signup:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to sign up with Google. Please try again.',
+        });
+      }
+    });
+
+    document.getElementById('facebook-signup-btn').addEventListener('click', async function() {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        const token = await result.user.getIdToken();
+        const response = await fetch('/auth/signup/facebook', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token })
+        });
+        if (response.ok) {
+          window.location.href = '/profile/setup';
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message);
+        }
+      } catch (error) {
+        console.error('Error during Facebook signup:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to sign up with Facebook. Please try again.',
         });
       }
     });

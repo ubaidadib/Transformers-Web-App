@@ -47,8 +47,8 @@ router.post('/signup', async (req, res) => {
 
       req.session.user = userCredential.user;
 
-      // Redirect to the main screen after successful signup
-      res.redirect('/');
+      // Redirect to profile setup screen
+      res.redirect('/profile/setup');
     } else {
       throw new Error('Failed reCAPTCHA verification');
     }
@@ -70,45 +70,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
-  const { email, password, 'g-recaptcha-response': recaptchaToken } = req.body;
-  try {
-    if (await verifyRecaptcha(recaptchaToken)) {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      req.session.user = userCredential.user;
-      res.redirect('/');
-    } else {
-      throw new Error('Failed reCAPTCHA verification');
-    }
-  } catch (error) {
-    console.error('Error during login:', error);
-
-    let errorMessage = 'An error occurred during login.';
-    if (error.code === 'auth/wrong-password') {
-      errorMessage = 'Invalid password. Please try again.';
-    } else if (error.code === 'auth/user-not-found') {
-      errorMessage = 'No user found with this email. Please sign up first.';
-    } else if (error.code === 'auth/invalid-credential') {
-      errorMessage = 'Invalid email or password. Please try again.';
-    }
-
-    res.status(400).send(`
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-      <script>
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: '${errorMessage}',
-          footer: '<a href="/auth/login">Try again</a>'
-        }).then(() => {
-          window.location.href = "/auth/login";
-        });
-      </script>
-    `);
-  }
-});
-
-router.post('/login/google', async (req, res) => {
+router.post('/signup/google', async (req, res) => {
   const { token } = req.body;
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);
@@ -127,9 +89,9 @@ router.post('/login/google', async (req, res) => {
       await setDoc(userDocRef, userDoc);
     }
 
-    res.redirect('/');
+    res.json({ success: true });
   } catch (error) {
-    console.error('Error during Google login:', error);
+    console.error('Error during Google signup:', error);
     res.status(400).send(`
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script>
@@ -137,16 +99,16 @@ router.post('/login/google', async (req, res) => {
           icon: 'error',
           title: 'Oops...',
           text: '${error.message}',
-          footer: '<a href="/auth/login">Try again</a>'
+          footer: '<a href="/auth/signup">Try again</a>'
         }).then(() => {
-          window.location.href = "/auth/login";
+          window.location.href = "/auth/signup";
         });
       </script>
     `);
   }
 });
 
-router.post('/login/facebook', async (req, res) => {  
+router.post('/signup/facebook', async (req, res) => {  
   const { token } = req.body;
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);
@@ -165,9 +127,9 @@ router.post('/login/facebook', async (req, res) => {
       await setDoc(userDocRef, userDoc);
     }
 
-    res.redirect('/');
+    res.json({ success: true });
   } catch (error) {
-    console.error('Error during Facebook login:', error);
+    console.error('Error during Facebook signup:', error);
     res.status(400).send(`
       <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script>
@@ -175,9 +137,9 @@ router.post('/login/facebook', async (req, res) => {
           icon: 'error',
           title: 'Oops...',
           text: '${error.message}',
-          footer: '<a href="/auth/login">Try again</a>'
+          footer: '<a href="/auth/signup">Try again</a>'
         }).then(() => {
-          window.location.href = "/auth/login";
+          window.location.href = "/auth/signup";
         });
       </script>
     `);
