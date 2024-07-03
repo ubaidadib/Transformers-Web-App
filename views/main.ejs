@@ -1,111 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <%- include('partials/head') %>
     <link rel="stylesheet" href="/css/styles.css">
-</head>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+        }
 
+        .main-header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .scan-card, .icon-card {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .scan-card:hover, .icon-card:hover {
+            transform: scale(1.05);
+        }
+
+        .scan-icon, .icon-img {
+            max-width: 100px;
+            margin-bottom: 10px;
+        }
+
+        .scan-text, .icon-card p {
+            font-weight: bold;
+        }
+
+        .icon-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .leaderboard, .module-progress {
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .social-icons a {
+            color: #fff;
+            margin: 0 10px;
+        }
+
+        @media (max-width: 768px) {
+            .icon-card-wrapper {
+                flex: 0 0 45%;
+                max-width: 45%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
 <body>
     <%- include('partials/header') %>
 
     <div class="container-fluid mt-4" id="content">
-      <div class="row justify-content-center">
-          <div class="col-lg-8">
-              <div class="main-header text-center">
-                  <h1>Welcome to Transformers!</h1>
-              </div>
-  
-              <div class="row justify-content-center mb-4">
-                  <div class="col-12 text-center mb-3">
-                      <div class="scan-card">
-                          <img src="/images/icons/scan-icon.png" alt="Scan Icon" class="img-fluid scan-icon">
-                          <p class="scan-text">Scan It!</p>
-                      </div>
-                  </div>
-              </div>
-  
-              <div class="row icon-grid justify-content-center">
-                  <div class="col-6 col-md-3 text-center icon-card-wrapper">
-                      <div class="icon-card">
-                          <img src="/images/icons/modules-icon.png" alt="Modules Icon" class="img-fluid icon-img">
-                          <p>Modules</p>
-                      </div>
-                  </div>
-                  <div class="col-6 col-md-3 text-center icon-card-wrapper">
-                      <div class="icon-card">
-                          <img src="/images/icons/challenges-icon.png" alt="Challenges Icon" class="img-fluid icon-img">
-                          <p>Challenge</p>
-                      </div>
-                  </div>
-                  <div class="col-6 col-md-3 text-center icon-card-wrapper">
-                      <div class="icon-card">
-                          <img src="/images/icons/map-icon.png" alt="Local Stations Icon" class="img-fluid icon-img">
-                          <p>Local Stations</p>
-                      </div>
-                  </div>
-                  <div class="col-6 col-md-3 text-center icon-card-wrapper">
-                      <div class="icon-card">
-                          <img src="/images/icons/coupons-icon.png" alt="Coupons Icon" class="img-fluid icon-img">
-                          <p>Coupons</p>
-                      </div>
-                  </div>
-              </div>
-  
-              <div class="row">
-                  <div class="col-lg-8">
-                      <h2>Featured Modules</h2>
-                      <% if (typeof modules !== 'undefined' && modules.length > 0) { %>
-                          <% modules.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach((module, index) => { %>
-                              <div class="card mb-3">
-                                  <div class="row no-gutters">
-                                      <div class="col-md-4">
-                                          <img src="/images/modulePhotos/<%= module.photo %>" class="card-img" alt="<%= module.title %> Image">
-                                      </div>
-                                      <div class="col-md-8">
-                                          <div class="card-body">
-                                              <h5 class="card-title"><%= module.title %></h5>
-                                              <p class="card-text"><%= module.shortDescription %></p>
-                                              <p class="card-text"><small class="text-muted"><%= module.modulePoints %> points</small></p>
-                                              <a href="/module/<%= module._id %>" class="btn module-button">Start Learning</a>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          <% }) %>
-                      <% } else { %>
-                          <div class="alert alert-warning" role="alert">
-                              No modules are available at the moment. Please check back soon as modules will be added shortly.
-                          </div>
-                      <% } %>
-                  </div>
-  
-                  <div class="col-lg-4">
-                      <div class="leaderboard">
-                          <h2>Leaderboard</h2>
-                          <ol class="list-group">
-                              <li class="list-group-item">1st: Lacus sit - 25 points</li>
-                              <li class="list-group-item">2nd: Sit vel - 23 points</li>
-                              <li class="list-group-item">3rd: Enim lobortis - 15 points</li>
-                          </ol>
-                      </div>
-  
-                      <div class="module-progress">
-                          <h2>Module Progress</h2>
-                          <ul class="list-group">
-                              <li class="list-group-item">Plastic: 50%</li>
-                              <li class="list-group-item">Recycling Techniques: 30%</li>
-                              <li class="list-group-item">Paper: 20%</li>
-                          </ul>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-  
-  
-  
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="main-header">
+                    <h1>Welcome to Transformers!</h1>
+                </div>
+
+                <div class="row justify-content-center mb-4">
+                    <div class="col-12 text-center mb-3">
+                        <div class="scan-card" id="scan-button">
+                            <img src="/images/icons/scan-icon.png" alt="Scan Icon" class="img-fluid scan-icon">
+                            <p class="scan-text">Scan It!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row icon-grid">
+                    <div class="col-6 col-md-3 text-center icon-card-wrapper">
+                        <div class="icon-card">
+                            <img src="/images/icons/modules-icon.png" alt="Modules Icon" class="img-fluid icon-img">
+                            <p>Modules</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center icon-card-wrapper">
+                        <div class="icon-card">
+                            <img src="/images/icons/challenges-icon.png" alt="Challenges Icon" class="img-fluid icon-img">
+                            <p>Challenge</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center icon-card-wrapper">
+                        <div class="icon-card">
+                            <img src="/images/icons/map-icon.png" alt="Local Stations Icon" class="img-fluid icon-img">
+                            <p>Local Stations</p>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center icon-card-wrapper">
+                        <div class="icon-card">
+                            <img src="/images/icons/coupons-icon.png" alt="Coupons Icon" class="img-fluid icon-img">
+                            <p>Coupons</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2>Featured Modules</h2>
+                        <% if (typeof modules !== 'undefined' && modules.length > 0) { %>
+                            <% modules.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach((module, index) => { %>
+                                <div class="card mb-3">
+                                    <div class="row no-gutters">
+                                        <div class="col-md-4">
+                                            <img src="/images/modulePhotos/<%= module.photo %>" class="card-img" alt="<%= module.title %> Image">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><%= module.title %></h5>
+                                                <p class="card-text"><%= module.shortDescription %></p>
+                                                <p class="card-text"><small class="text-muted"><%= module.modulePoints %> points</small></p>
+                                                <a href="/module/<%= module._id %>" class="btn module-button">Start Learning</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="alert alert-warning" role="alert">
+                                No modules are available at the moment. Please check back soon as modules will be added shortly.
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="leaderboard">
+                            <h2>Leaderboard</h2>
+                            <ol class="list-group">
+                                <li class="list-group-item">1st: Lacus sit - 25 points</li>
+                                <li class="list-group-item">2nd: Sit vel - 23 points</li>
+                                <li class="list-group-item">3rd: Enim lobortis - 15 points</li>
+                            </ol>
+                        </div>
+
+                        <div class="module-progress">
+                            <h2>Module Progress</h2>
+                            <ul class="list-group">
+                                <li class="list-group-item">Plastic: 50%</li>
+                                <li class="list-group-item">Recycling Techniques: 30%</li>
+                                <li class="list-group-item">Paper: 20%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer mt-auto">
         <div class="container text-center">
@@ -121,6 +178,10 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('scan-button').addEventListener('click', function() {
+            window.location.href = '/barcode-scanner';
+        });
+    </script>
 </body>
-
 </html>

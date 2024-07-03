@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://unpkg.com/@zxing/library@0.18.6"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #scanner-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px 0;
+    }
+    #result {
+      margin-top: 20px;
+    }
+    .result-card {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="mt-5">Scan Barcode</h2>
+    <div id="scanner-container" class="mb-3"></div>
+    <button id="start-scan" class="btn btn-primary">Start Scanning</button>
+    <button id="stop-scan" class="btn btn-danger" style="display: none;">Stop Scanning</button>
+
+    <div id="result" class="result-card">
+      <h4>Product Information</h4>
+      <p><strong>Barcode:</strong> <span id="barcode"></span></p>
+      <p><strong>Feedback:</strong> <span id="feedback"></span></p>
+      <p><strong>Additional Info:</strong> <span id="additional-info"></span></p>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      const codeReader = new ZXing.BrowserBarcodeReader();
+
+      $('#start-scan').on('click', async function() {
+        console.log('Start scan clicked');
+        $('#start-scan').hide();
+        $('#stop-scan').show();
+
+        try {
+          const videoInputDevices = await codeReader.listVideoInputDevices();
+          console.log('Video input devices:', videoInputDevices);
+          if (videoInputDevices.length === 0) {
+            console.error('No video input devices found');
+            return;
+          }
+          const selectedDeviceId = videoInputDevices[0].deviceId;
+          console.log('Selected device ID:', selectedDeviceId);
+
+          codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'scanner-container')
+            .then(result => {
+              console.log('Barcode scanned', result);
+              $('#result').show();
+              $('#barcode').text(result.text);
+              sendScanData(result.text);
+            })
+            .catch(err => console.error('Decode error:', err));
+        } catch (error) {
+          console.error('Error listing video input devices:', error);
+        }
+      });
+
+      $('#stop-scan').on('click', function() {
+        codeReader.reset();
+        $('#start-scan').show();
+        $('#stop-scan').hide();
+        $('#result').hide();
+      });
+
+      async function sendScanData(barcode) {
+        try {
+          const response = await fetch('/barcode-scanner/scan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ barcode, feedback: 'Recyclable' }) // Example feedback
+          });
+          const data = await response.json();
+          console.log('Scan data response:', data);
+          if (data.success) {
+            $('#feedback').text(data.data.feedback);
+            $('#additional-info').text(data.data.additionalInfo);
+          } else {
+            $('#feedback').text('Failed to get feedback');
+            $('#additional-info').text('');
+          }
+        } catch (error) {
+          console.error('Error sending scan data:', error);
+          $('#feedback').text('Error');
+          $('#additional-info').text('');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

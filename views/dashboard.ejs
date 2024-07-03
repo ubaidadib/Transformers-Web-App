@@ -22,6 +22,10 @@
     #sidebar .nav-link {
       color: #fff;
     }
+    #sidebar .nav-link.active {
+      background: #495057;
+      border-radius: 5px;
+    }
     #content {
       flex: 1;
       padding: 20px;
@@ -45,16 +49,16 @@
       </div>
       <ul class="nav flex-column">
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showSection('profile-section')">Profile</a>
+          <a class="nav-link" href="#profile-section" onclick="showSection('profile-section')">Profile</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showSection('settings-section')">Settings</a>
+          <a class="nav-link" href="#settings-section" onclick="showSection('settings-section')">Settings</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showSection('activity-section')">Activity Log</a>
+          <a class="nav-link" href="#activity-section" onclick="showSection('activity-section')">Activity Log</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="showSection('help-section')">Help/Support</a>
+          <a class="nav-link" href="#help-section" onclick="showSection('help-section')">Help/Support</a>
         </li>
         <li class="nav-item mt-3">
           <form action="/auth/logout" method="post">
@@ -140,6 +144,10 @@
         section.style.display = 'none';
       });
       document.getElementById(sectionId).style.display = 'block';
+      document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      document.querySelector(`#sidebar .nav-link[href="#${sectionId}"]`).classList.add('active');
       history.pushState(null, '', `#${sectionId}`);
     }
 

@@ -1,3 +1,5 @@
+// server.js
+
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
@@ -112,7 +114,19 @@ app.post('/profile/setup', checkAuth, upload.single('profilePicture'), async (re
   }
 });
 
+// Logout route
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Failed to destroy session during logout:', err);
+      return res.status(500).send('Failed to logout');
+    }
+    res.redirect('/auth/login');
+  });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
