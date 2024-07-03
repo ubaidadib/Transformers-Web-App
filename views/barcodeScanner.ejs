@@ -6,7 +6,6 @@
   <title>Barcode Scanner</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <script src="https://unpkg.com/@zxing/library@0.18.6"></script>
   <style>
     body {
       display: flex;
@@ -41,7 +40,9 @@
 <body>
   <div class="container">
     <h2 class="mt-5">Scan Barcode</h2>
-    <div id="scanner-container" class="mb-3"></div>
+    <div id="scanner-container" class="mb-3">
+      <video id="video" width="100%" height="100%"></video>
+    </div>
     <button id="start-scan" class="btn btn-primary">Start Scanning</button>
     <button id="stop-scan" class="btn btn-danger" style="display: none;">Stop Scanning</button>
 
@@ -56,9 +57,12 @@
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
   <script>
     $(document).ready(function() {
+      console.log("Document is ready");
       const codeReader = new ZXing.BrowserBarcodeReader();
+      const videoElement = document.getElementById('video');
 
       $('#start-scan').on('click', async function() {
         console.log('Start scan clicked');
@@ -75,7 +79,7 @@
           const selectedDeviceId = videoInputDevices[0].deviceId;
           console.log('Selected device ID:', selectedDeviceId);
 
-          codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'scanner-container')
+          codeReader.decodeOnceFromVideoDevice(selectedDeviceId, videoElement)
             .then(result => {
               console.log('Barcode scanned', result);
               $('#result').show();
